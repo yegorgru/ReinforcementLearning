@@ -5,10 +5,12 @@ public class CarController : MonoBehaviour
     private const string HORIZONTAL = "Horizontal";
     private const string VERTICAL = "Vertical";
 
-    private float horizontalInput;
-    private float verticalInput;
-    private bool isBraking;
+    public float horizontalInput { get; set; }
+    public float verticalInput { get; set; }
+    public bool isBraking { get; set; }
     private float steerAngle;
+
+    public bool IsAutonomous { get; set; } = false;
 
     [SerializeField]
     private float motorForce;
@@ -37,10 +39,20 @@ public class CarController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        GetInput();
+        if (!IsAutonomous)
+        {
+            GetInput();
+        }
         HandleMotor();
         HandleSteering();
         UpdateWheels();
+    }
+
+    public void SetInputs(float horizontalInput, float verticalInput, bool isBraking)
+    {
+        this.horizontalInput = horizontalInput;
+        this.verticalInput = verticalInput;
+        this.isBraking = isBraking;
     }
 
     private void GetInput()
