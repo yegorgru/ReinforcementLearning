@@ -104,8 +104,20 @@ public class CarAgent : Agent
 
         if (counter == carCorners.Length)
         {
+            float yRotation = Mathf.Abs(transform.rotation.y);
+            float jackpotReward = 4f;
+            if (yRotation <= 5f)
+            {
+                jackpotReward = 64f;
+                Debug.Log("Huge Success");
+            }
+            else if (yRotation <= 12f)
+            {
+                jackpotReward = 16f;
+                Debug.Log("Big Success");
+            }
             float currReward = GetCumulativeReward();
-            SetReward(Mathf.Max(10f, currReward + 10f));
+            SetReward(Mathf.Max(jackpotReward, currReward + jackpotReward));
             Debug.Log("Success");
             EndEpisode();
         }
