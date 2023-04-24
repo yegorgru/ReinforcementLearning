@@ -39,8 +39,34 @@ public class CarAgent : Agent
     {
         // Get the discrete action index from the actionBuffers
         int discreteAction = actions.DiscreteActions[0];
-        float horizontal = actions.ContinuousActions[0];
-        float vertical = actions.ContinuousActions[1];
+        int discrete1 = actions.DiscreteActions[1];
+        float discrete2 = actions.DiscreteActions[2];
+        float horizontal = 0f;
+        switch (discrete1)
+        {
+        case 0:
+            horizontal = -1f;
+            break;
+        case 1:
+            horizontal = 0f;
+            break;
+        case 2:
+            horizontal = 1f;
+            break;
+        }
+        float vertical = 0f;
+        switch (discrete2)
+        {
+            case 0:
+                vertical = -1f;
+                break;
+            case 1:
+                vertical = 0f;
+                break;
+            case 2:
+                vertical = 1f;
+                break;
+        }
 
         bool isBraking = discreteAction == 1;
 
@@ -68,7 +94,7 @@ public class CarAgent : Agent
         if (counter == carCorners.Length)
         {
             float currReward = GetCumulativeReward();
-            SetReward(Mathf.Max(1f, currReward + 1));
+            SetReward(Mathf.Max(10f, currReward + 10f));
             Debug.Log("Success");
             EndEpisode();
         }
@@ -87,13 +113,13 @@ public class CarAgent : Agent
         if(tag == "barrier")
         {
             Debug.Log("Barrier hit");
-            AddReward(-0.5f);
+            AddReward(-0.2f);
             EndEpisode();
         }
         else if(tag == "car")
         {
             Debug.Log("Car hit");
-            AddReward(-1f);
+            AddReward(-0.2f);
             EndEpisode();
         }
         else if(tag == "goal")

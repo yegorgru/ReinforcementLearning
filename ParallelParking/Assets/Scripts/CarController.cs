@@ -57,8 +57,8 @@ public class CarController : MonoBehaviour
 
     private void GetInput()
     {
-        horizontalInput = Input.GetAxis(HORIZONTAL);
-        verticalInput = Input.GetAxis(VERTICAL);
+        horizontalInput = Mathf.Round(Input.GetAxis(HORIZONTAL));
+        verticalInput = Mathf.Round(Input.GetAxis(VERTICAL));
         isBraking = Input.GetKey(KeyCode.Space);
     }
 
