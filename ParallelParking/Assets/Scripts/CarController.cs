@@ -39,6 +39,7 @@ public class CarController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        CheckConstraints();
         if (!IsAutonomous)
         {
             GetInput();
@@ -48,6 +49,11 @@ public class CarController : MonoBehaviour
         UpdateWheels();
     }
 
+    protected virtual void CheckConstraints()
+    {
+
+    }
+
     public void SetInputs(float horizontalInput, float verticalInput, bool isBraking)
     {
         this.horizontalInput = horizontalInput;
@@ -55,7 +61,7 @@ public class CarController : MonoBehaviour
         this.isBraking = isBraking;
     }
 
-    private void GetInput()
+    protected virtual void GetInput()
     {
         horizontalInput = Mathf.Round(Input.GetAxis(HORIZONTAL));
         verticalInput = Mathf.Round(Input.GetAxis(VERTICAL));

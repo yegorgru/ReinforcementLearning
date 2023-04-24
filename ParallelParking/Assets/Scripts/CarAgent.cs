@@ -14,6 +14,9 @@ public class CarAgent : Agent
     [SerializeField]
     private Collider parkingCollider;
 
+    [SerializeField]
+    private Collider deeperParkingCollider;
+
     public override void Initialize()
     {
         originalPosition = transform.localPosition;
@@ -33,6 +36,7 @@ public class CarAgent : Agent
     {
         sensor.AddObservation(transform.localPosition);
         sensor.AddObservation(transform.rotation);
+        sensor.AddObservation(deeperParkingCollider.transform.localPosition);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -44,15 +48,15 @@ public class CarAgent : Agent
         float horizontal = 0f;
         switch (discrete1)
         {
-        case 0:
-            horizontal = -1f;
-            break;
-        case 1:
-            horizontal = 0f;
-            break;
-        case 2:
-            horizontal = 1f;
-            break;
+            case 0:
+                horizontal = -1f;
+                break;
+            case 1:
+                horizontal = 0f;
+                break;
+            case 2:
+                horizontal = 1f;
+                break;
         }
         float vertical = 0f;
         switch (discrete2)
@@ -75,6 +79,7 @@ public class CarAgent : Agent
         int counter = 0;
 
         Bounds parkingBounds = parkingCollider.bounds;
+        Bounds deeperParkingBounds = deeperParkingCollider.bounds;
         Bounds carBounds = GetComponent<Collider>().bounds;
 
         Vector3[] carCorners = new Vector3[4];
@@ -83,12 +88,18 @@ public class CarAgent : Agent
         carCorners[2] = carBounds.center + new Vector3(carBounds.extents.x, 0, -carBounds.extents.z);
         carCorners[3] = carBounds.center + new Vector3(carBounds.extents.x, 0, carBounds.extents.z);
 
+        float additionalReward = 0f;
         foreach (Vector3 corner in carCorners)
         {
             if (parkingBounds.Contains(corner))
             {
                 counter++;
+                additionalReward += 0.5f / MaxStep;
             }
+            /*if(deeperParkingBounds.Contains(corner))
+            {
+                additionalReward += 1f / MaxStep;
+            }*/
         }
 
         if (counter == carCorners.Length)
@@ -98,35 +109,48 @@ public class CarAgent : Agent
             Debug.Log("Success");
             EndEpisode();
         }
-        else
+        else if(counter > 0)
         {
-            AddReward(counter * 1f / MaxStep);
+            additionalReward += 1f / MaxStep / Vector3.Distance(deeperParkingCollider.transform.localPosition, transform.localPosition);
+            if(discrete2 == 1 || isBraking)
+            {
+                additionalReward /= 2;
+            }
         }
-
-
+        AddReward(additionalReward);
         AddReward(-1f / MaxStep);
     }
-
     private void OnTriggerEnter(Collider other)
     {
         string tag = other.transform.tag.ToLower();
-        if(tag == "barrier")
+        if (tag == "barrier")
         {
             Debug.Log("Barrier hit");
             AddReward(-0.2f);
             EndEpisode();
         }
-        else if(tag == "car")
+        else if (tag == "car")
         {
             Debug.Log("Car hit");
             AddReward(-0.2f);
             EndEpisode();
         }
-        else if(tag == "goal")
+        else if (tag == "goal")
         {
             Debug.Log("Goal hit");
             /*AddReward(0.01f);
             EndEpisode();*/
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        string tag = collision.transform.tag.ToLower();
+        if (tag == "car")
+        {
+            Debug.Log("Car hit");
+            AddReward(-0.2f);
+            EndEpisode();
         }
     }
 }
