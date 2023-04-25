@@ -20,7 +20,7 @@ public class CarAgent : Agent
     public override void Initialize()
     {
         originalPosition = transform.localPosition;
-        originalRotation = transform.rotation;
+        originalRotation = transform.localRotation;
         behaviorParameters = GetComponent<BehaviorParameters>();
         carController = GetComponent<CarController>();
         carController.IsAutonomous = behaviorParameters.BehaviorType == BehaviorType.Default;
@@ -29,13 +29,13 @@ public class CarAgent : Agent
     public override void OnEpisodeBegin()
     {
         transform.localPosition = originalPosition;
-        transform.rotation = originalRotation;
+        transform.localRotation = originalRotation;
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
         sensor.AddObservation(transform.localPosition);
-        sensor.AddObservation(transform.rotation);
+        sensor.AddObservation(transform.localRotation);
         sensor.AddObservation(deeperParkingCollider.transform.localPosition);
     }
 
@@ -101,17 +101,17 @@ public class CarAgent : Agent
                 additionalReward += 1f / MaxStep;
             }*/
         }
-
         if (counter == carCorners.Length)
         {
-            float yRotation = Mathf.Abs(transform.rotation.y);
+            float yRotation = Mathf.Abs(transform.localRotation.y);
+            Debug.Log(yRotation);
             float jackpotReward = 4f;
-            if (yRotation <= 5f)
+            if (yRotation <= 0.02f)
             {
                 jackpotReward = 64f;
                 Debug.Log("Huge Success");
             }
-            else if (yRotation <= 12f)
+            else if (yRotation <= 3f)
             {
                 jackpotReward = 16f;
                 Debug.Log("Big Success");
@@ -124,10 +124,6 @@ public class CarAgent : Agent
         else if(counter > 0)
         {
             additionalReward += 1f / MaxStep / Vector3.Distance(deeperParkingCollider.transform.localPosition, transform.localPosition);
-            if(discrete2 == 1 || isBraking)
-            {
-                additionalReward /= 2;
-            }
         }
         AddReward(additionalReward);
         AddReward(-1f / MaxStep);
@@ -164,5 +160,10 @@ public class CarAgent : Agent
             AddReward(-0.2f);
             EndEpisode();
         }
+    }
+
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        
     }
 }
