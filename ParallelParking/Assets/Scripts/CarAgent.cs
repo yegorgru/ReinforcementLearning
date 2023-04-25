@@ -17,6 +17,12 @@ public class CarAgent : Agent
     [SerializeField]
     private Collider deeperParkingCollider;
 
+    [SerializeField]
+    private float spawningStart;
+
+    [SerializeField]
+    private float spawningFinish;
+
     public override void Initialize()
     {
         originalPosition = transform.localPosition;
@@ -30,6 +36,10 @@ public class CarAgent : Agent
     {
         transform.localPosition = originalPosition;
         transform.localRotation = originalRotation;
+
+        System.Random random = new System.Random();
+        float randomCoordinate = (float)(random.NextDouble() * (spawningFinish - spawningStart) + spawningStart);
+        transform.localPosition = new Vector3(originalPosition.x, originalPosition.y, randomCoordinate);
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -106,7 +116,7 @@ public class CarAgent : Agent
             float yRotation = Mathf.Abs(transform.localRotation.y);
             Debug.Log(yRotation);
             float jackpotReward = 4f;
-            if (yRotation <= 0.02f)
+            if (yRotation <= 0.1f)
             {
                 jackpotReward = 64f;
                 Debug.Log("Huge Success");
